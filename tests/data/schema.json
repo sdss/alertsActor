@@ -1,0 +1,12 @@
+{
+  "type": "object",
+  "properties": {
+    "isPositive": { "type": "number" },
+    "isNegative": { "type": "number" },
+    "always": { "type": "string" },
+    "flagged": { "type": "number" },
+    "heartbeat": { "type": "number" },
+    "goesStale": {"type": "number" },
+    "additionalProperties": false
+  }
+}

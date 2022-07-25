@@ -175,7 +175,7 @@ class below(YAMLObject):
 
 
 class neq(YAMLObject):
-    """literally: is the value too low
+    """must always be
     """
     def __init__(self):
         pass

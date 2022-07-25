@@ -4,41 +4,37 @@
 # instrumentState.py
 #
 
-
-from __future__ import division
-from __future__ import print_function
-from __future__ import absolute_import
-
 import click
 
-from alertsActor.cmds import alerts_context
-
-__all__ = ('instrumentState')
+from alertsActor.cmds import parser
 
 
-@click.command()
-@click.argument('instrument', nargs=1, default=None, required=True)
-@click.argument('state', nargs=1, default='up', type=click.Choice(['up', 'down']))
-@alerts_context
-def instrumentState(actor, cmd, user, instrument=None, state="up"):
+@parser.command("instrumentState")
+@click.argument('instrument', type=str, default=None, required=True)
+@click.argument('state', default='up', required=True,
+                type=click.Choice(['up', 'down']))
+@click.option('-u', '--user', type=str, default=None,
+              help='user setting state')
+async def instrumentState(command, instrument=None, state="up", user=None):
     """set the state of an instrument"""
+
+    actor = command.actor
+
+    if user is None:
+        user = ""
 
     if state == "down":
         actor.instrumentDown[instrument] = True
-        for a in actor.activeAlerts:
-            if instrument in a.instruments:
-                a.disable(user)
+        for k, alert in actor.monitoring.items():
+            if instrument in alert.instruments:
+                await alert.disable(user)
     else:
         actor.instrumentDown[instrument] = False
-        for a in actor.disabledAlerts:
-            if not a.instDown:
-                a.enable()
+        for k, alert in actor.monitoring.items():
+            if not alert.instDown:
+                await alert.enable()
 
-    actor.broadcastActive()
-    actor.broadcastDisabled()
-    actor.broadcastAll()
-    actor.broadcastInstruments()
+    await actor.broadcastAll()
+    await actor.broadcastInstruments()
 
-    cmd.setState(cmd.Done, '{} set to {}'.format(instrument, state))
-
-    return False
+    return command.finish()

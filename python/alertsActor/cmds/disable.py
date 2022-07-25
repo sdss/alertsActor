@@ -3,38 +3,27 @@
 #
 # disable.py
 
-
-
-from __future__ import division
-from __future__ import print_function
-from __future__ import absolute_import
-
 import click
 
-from alertsActor.cmds import alerts_context
-
-__all__ = ('disable')
+from alertsActor.cmds import parser
 
 
-@click.command()
-@click.argument('alertkey', nargs=1, default=None, required=True)
-@click.argument('severity', nargs=1, default='info',
-                type=click.Choice(['ok', 'info', 'apogeediskwarn', 'warn', 'serious', 'critical']))
-@alerts_context
-def disable(actor, cmd, user, alertkey=None, severity='info'):
+@parser.command()
+@click.argument('alertkey', type=str, required=True)
+@click.option('-u', '--user', type=str, default=None,
+              help='user disabling this alert')
+async def disable(command, alertkey, user=None):
     """disable an alert"""
 
-    # if isinstance(alertkey, unicode):
-    #     alertkey = str(alertkey)
+    if user is None:
+        user = ""
+
+    actor = command.actor
 
     keyword = actor.monitoring[alertkey]
 
-    keyword.disable(user)
+    await keyword.disable(user)
 
-    actor.broadcastActive()
-    actor.broadcastDisabled()
-    actor.broadcastAll()
+    await actor.broadcastAll()
 
-    cmd.setState(cmd.Done, 'disabled')
-
-    return False
+    return command.finish()
