@@ -24,11 +24,11 @@ else:
 try:
     config = yaml.load(open(configFile), Loader=yaml.FullLoader)
 
-    alertActions = yaml.load(open(actionsFile), Loader=yaml.UnsafeLoader)
+    # alertActions = yaml.load(open(actionsFile), Loader=yaml.UnsafeLoader)
 except AttributeError:
     # using pyyaml < 5, enforce old behavior
     config = yaml.load(open(configFile))
 
-    alertActions = yaml.load(open(actionsFile))
+    # alertActions = yaml.load(open(actionsFile))
 
 __version__ = '3.0.0a'

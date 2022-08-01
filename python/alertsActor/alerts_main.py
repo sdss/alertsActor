@@ -11,7 +11,8 @@ import yaml
 from clu.actor import AMQPActor
 from clu.client import AMQPClient
 
-from alertsActor import __version__, alertActions, config
+from alertsActor import __version__, config
+from alertsActor import actionsFile as localActions
 from alertsActor.cmds import parser as alerts_parser
 from alertsActor import log
 from alertsActor.rules import callbackWrapper, mail, dangerKey
@@ -39,12 +40,13 @@ class alertsActor(AMQPActor):
         self.callbacks = callbackWrapper.wrapCallbacks(self)
 
         # actionsFile = kwargs.get("actionsFile", None)
-        if actionsFile is not None:
-            # mostly for testing
-            try:
-                alertActions = yaml.load(open(actionsFile), Loader=yaml.UnsafeLoader)
-            except AttributeError:
-                alertActions = yaml.load(open(actionsFile))
+        if actionsFile is None:
+            actionsFile = localActions
+        # mostly for testing
+        try:
+            alertActions = yaml.load(open(actionsFile), Loader=yaml.UnsafeLoader)
+        except AttributeError:
+            alertActions = yaml.load(open(actionsFile))
 
         self.alertActions = alertActions
 
